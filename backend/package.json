@@ -1,41 +1,31 @@
 {
-  "name": "noode",
+  "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
   "type": "module",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js",
-    "build": "tsc -p tsconfig.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "axios": "^1.11.0",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "date-fns": "^4.1.0",
-    "dotenv": "^17.2.1",
-    "env": "^0.0.2",
-    "express": "^5.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.18.0",
-    "mongoose": "^8.17.1",
-    "react-router-dom": "^7.8.2"
+    "mongoose": "^8.6.3"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.3.0",
-    "@types/react-router-dom": "^5.3.3",
-    "tsx": "^4.20.4",
-    "typescript": "^5.9.2"
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^20.14.12",
+    "tsx": "^4.19.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
   }
 }
