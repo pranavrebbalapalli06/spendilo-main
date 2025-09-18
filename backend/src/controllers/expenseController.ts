@@ -1,7 +1,8 @@
-import type { Request, Response } from "express";
+import type { Response } from "express";
+import type { AuthRequest } from "../middlewares/authMiddleware.js";
 import Expense from "../models/Expense.js"
 
-export const addExpense = async (req: Request, res: Response) => {
+export const addExpense = async (req: AuthRequest, res: Response) => {
   try {
     const { category, amount, date, description } = req.body;
     const expense = new Expense({ user: req.user.id, category, amount, date, description });
@@ -12,7 +13,7 @@ export const addExpense = async (req: Request, res: Response) => {
   }
 };
 
-export const getExpenses = async (req: Request, res: Response) => {
+export const getExpenses = async (req: AuthRequest, res: Response) => {
   try {
     const expenses = await Expense.find({ user: req.user.id });
     res.json(expenses);
@@ -21,7 +22,7 @@ export const getExpenses = async (req: Request, res: Response) => {
   }
 };
 
-export const updateExpense = async (req: Request, res: Response) => {
+export const updateExpense = async (req: AuthRequest, res: Response) => {
   try {
     const expense = await Expense.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(expense);
@@ -30,7 +31,7 @@ export const updateExpense = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteExpense = async (req: Request, res: Response) => {
+export const deleteExpense = async (req: AuthRequest, res: Response) => {
   try {
     await Expense.findByIdAndDelete(req.params.id);
     res.json({ msg: "Expense Deleted" });
