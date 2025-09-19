@@ -28,22 +28,20 @@ console.log('Allowed origins:', allowedOrigins);
 const corsOptions = {
   origin: function (origin: string | undefined, callback: Function) {
     console.log('CORS origin check:', origin);
-    console.log('Allowed origins:', allowedOrigins);
-    
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
+
+    if (!origin) return callback(null, true); // allow tools like Postman
+
+    if (allowedOrigins.includes(origin)) {
       console.log('Origin allowed:', origin);
-      callback(null, true);
+      callback(null, origin); // ✅ reflect origin
     } else {
       console.log('Origin blocked:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true, // Allow cookies to be sent
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 // Middleware
