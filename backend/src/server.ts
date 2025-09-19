@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import type { CorsOptions } from "cors"; // ✅ type-only import
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import authRoutes from "./route/authRoutes.js";
@@ -10,72 +11,80 @@ dotenv.config();
 
 const app = express();
 
-// Trust proxy for correct HTTPS detection (required for secure cookies on Render/Proxies)
-app.set('trust proxy', 1);
+// ✅ Trust proxy for correct HTTPS detection (needed for Secure cookies on Render/Proxies)
+app.set("trust proxy", 1);
 
-// CORS configuration for deployment
-console.log('NODE_ENV:', process.env.NODE_ENV);
+// ✅ Allowed origins depending on environment
+const allowedOrigins =
+  process.env.NODE_ENV === "production"
+    ? [
+        "https://frontend-one-topaz-21.vercel.app", // Vercel frontend
+        "https://spedilo-main.onrender.com",        // Backend itself
+      ]
+    : ["http://localhost:3000", "http://localhost:3001"];
 
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? [
-      'https://frontend-one-topaz-21.vercel.app',
-      'https://spedilo-main.onrender.com'
-    ]
-  : ['http://localhost:3000', 'http://localhost:3001'];
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("Allowed origins:", allowedOrigins);
 
-console.log('Allowed origins:', allowedOrigins);
+// ✅ CORS config
+const corsOptions: CorsOptions = {
+  origin: function (origin, callback) {
+    console.log("CORS origin check:", origin);
 
-const corsOptions = {
-  origin: function (origin: string | undefined, callback: Function) {
-    console.log('CORS origin check:', origin);
-
-    if (!origin) return callback(null, true); // allow tools like Postman
+    if (!origin) {
+      // allow requests with no origin (e.g., Postman, curl)
+      return callback(null, true);
+    }
 
     if (allowedOrigins.includes(origin)) {
-      console.log('Origin allowed:', origin);
-      callback(null, origin); // ✅ reflect origin
+      console.log("✅ Origin allowed:", origin);
+      return callback(null, origin); // must return the origin string
     } else {
-      console.log('Origin blocked:', origin);
-      callback(new Error('Not allowed by CORS'));
+      console.log("❌ Origin blocked:", origin);
+      return callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // allow sending cookies
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// Middleware
+// ✅ Apply CORS + handle preflight
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
+// Middleware
 app.use(cookieParser());
 app.use(express.json());
 
-// Add logging middleware for debugging
+// ✅ Debug logger
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
-  console.log('CORS allowed origins:', allowedOrigins);
+  console.log(
+    `${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin}`
+  );
   next();
 });
 
-// Health check endpoint
+// ✅ Health check
 app.get("/api/health", (req, res) => {
-  res.json({ 
-    status: "OK", 
+  res.json({
+    status: "OK",
     timestamp: new Date().toISOString(),
-    origin: req.headers.origin 
+    origin: req.headers.origin,
   });
 });
 
-// Routes
+// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 
-// MongoDB Connection
+// ✅ MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI as string)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ DB Connection Error:", err));
 
-// Start Server
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
