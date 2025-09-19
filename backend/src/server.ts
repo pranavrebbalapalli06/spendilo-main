@@ -1,7 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";
-import type { CorsOptions } from "cors"; // ✅ type-only import
+import cors, { type CorsOptions } from "cors"; // ✅ import type
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import authRoutes from "./route/authRoutes.js";
@@ -11,15 +10,15 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Trust proxy for correct HTTPS detection (needed for Secure cookies on Render/Proxies)
+// ✅ Trust proxy for secure cookies (Render/Proxies)
 app.set("trust proxy", 1);
 
-// ✅ Allowed origins depending on environment
+// ✅ Allowed origins
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? [
         "https://frontend-one-topaz-21.vercel.app", // Vercel frontend
-        "https://spedilo-main.onrender.com",        // Backend itself
+        "https://spedilo-main.onrender.com",        // Backend
       ]
     : ["http://localhost:3000", "http://localhost:3001"];
 
@@ -31,27 +30,34 @@ const corsOptions: CorsOptions = {
   origin: function (origin, callback) {
     console.log("CORS origin check:", origin);
 
-    if (!origin) {
-      // allow requests with no origin (e.g., Postman, curl)
-      return callback(null, true);
-    }
+    if (!origin) return callback(null, true); // allow Postman/curl
 
     if (allowedOrigins.includes(origin)) {
       console.log("✅ Origin allowed:", origin);
-      return callback(null, origin); // must return the origin string
+      return callback(null, origin); // reflect allowed origin
     } else {
       console.log("❌ Origin blocked:", origin);
       return callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true, // allow sending cookies
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// ✅ Apply CORS + handle preflight
+// ✅ Apply CORS + preflight
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
+
+// ✅ Force headers middleware (fixes '*' issue)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Access-Control-Allow-Credentials", "true");
+  }
+  next();
+});
 
 // Middleware
 app.use(cookieParser());
