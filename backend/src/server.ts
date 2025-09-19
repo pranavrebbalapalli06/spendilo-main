@@ -14,31 +14,21 @@ const app = express();
 app.set("trust proxy", 1);
 
 // ✅ Allowed origins
-const allowedOrigins =
-  process.env.NODE_ENV === "production"
-    ? [
-        "https://frontend-one-topaz-21.vercel.app", // Vercel frontend
-      ]
-    : ["http://localhost:5173", "http://localhost:3000"];
+const allowedOrigins = [
+  'https://frontend-one-topaz-21.vercel.app',
+  'http://localhost:3000'
+];
 
-// ✅ CORS config
+// ✅ Simplified and more robust CORS config
 const corsOptions: CorsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow Postman/cURL
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, origin); // reflect allowed origin
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true, // ✅ allow cookies
+  origin: allowedOrigins, // <-- Let the library handle the check
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// ✅ Apply CORS once
+// ✅ Apply CORS middleware once. It handles OPTIONS requests automatically.
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
 
 // ✅ Middleware
 app.use(cookieParser());
