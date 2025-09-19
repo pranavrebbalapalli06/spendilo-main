@@ -7,6 +7,8 @@ import authRoutes from "./route/authRoutes.js";
 import expenseRoutes from "./route/expenseRoutes.js";
 dotenv.config();
 const app = express();
+// Trust proxy for correct HTTPS detection (required for secure cookies on Render/Proxies)
+app.set('trust proxy', 1);
 // CORS configuration for deployment
 console.log('NODE_ENV:', process.env.NODE_ENV);
 const allowedOrigins = process.env.NODE_ENV === 'production'
