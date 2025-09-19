@@ -12,7 +12,7 @@ const app = express();
 
 // CORS configuration for deployment
 const corsOptions = {
-  origin: function (origin, callback) {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
