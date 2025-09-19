@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors, { type CorsOptions } from "cors"; // ✅ import type
+import cors, { type CorsOptions } from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import authRoutes from "./route/authRoutes.js";
@@ -10,7 +10,7 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Trust proxy for secure cookies (Render/Proxies)
+// ✅ Trust proxy (needed for Render/proxies with secure cookies)
 app.set("trust proxy", 1);
 
 // ✅ Allowed origins
@@ -18,48 +18,29 @@ const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? [
         "https://frontend-one-topaz-21.vercel.app", // Vercel frontend
-        "https://spedilo-main.onrender.com",        // Backend
       ]
-    : ["http://localhost:3000", "http://localhost:3001"];
-
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("Allowed origins:", allowedOrigins);
+    : ["http://localhost:5173", "http://localhost:3000"];
 
 // ✅ CORS config
 const corsOptions: CorsOptions = {
   origin: function (origin, callback) {
-    console.log("CORS origin check:", origin);
-
-    if (!origin) return callback(null, true); // allow Postman/curl
-
+    if (!origin) return callback(null, true); // allow Postman/cURL
     if (allowedOrigins.includes(origin)) {
-      console.log("✅ Origin allowed:", origin);
       return callback(null, origin); // reflect allowed origin
     } else {
-      console.log("❌ Origin blocked:", origin);
       return callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true,
+  credentials: true, // ✅ allow cookies
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// ✅ Apply CORS + preflight
+// ✅ Apply CORS once
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
-// ✅ Force headers middleware (fixes '*' issue)
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin && allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Credentials", "true");
-  }
-  next();
-});
-
-// Middleware
+// ✅ Middleware
 app.use(cookieParser());
 app.use(express.json());
 
