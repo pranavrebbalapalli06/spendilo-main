@@ -11,6 +11,8 @@ dotenv.config();
 const app = express();
 
 // CORS configuration for deployment
+console.log('NODE_ENV:', process.env.NODE_ENV);
+
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [
       'https://frontend-one-topaz-21.vercel.app',
@@ -18,8 +20,24 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
     ]
   : ['http://localhost:3000', 'http://localhost:3001'];
 
+console.log('Allowed origins:', allowedOrigins);
+
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: function (origin: string | undefined, callback: Function) {
+    console.log('CORS origin check:', origin);
+    console.log('Allowed origins:', allowedOrigins);
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      console.log('Origin allowed:', origin);
+      callback(null, true);
+    } else {
+      console.log('Origin blocked:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true, // Allow cookies to be sent
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
