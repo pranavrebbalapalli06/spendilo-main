@@ -6,11 +6,12 @@ export interface AuthRequest extends Request {
 }
 
 export const protect = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
+  // Try to get token from cookie first, then from Authorization header
+  const token = req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
   if (!token) return res.status(401).json({ msg: "No token, authorization denied" });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret") as { id: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey") as { id: string };
     req.user = decoded;
     next();
   } catch (err) {

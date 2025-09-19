@@ -23,7 +23,8 @@ export const registerUser = async (req, res) => {
 };
 export const getUserProfile = async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        // Try to get token from cookie first, then from Authorization header
+        const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
         if (!token) {
             return res.status(401).json({ message: "No token provided" });
         }
@@ -44,6 +45,22 @@ export const getUserProfile = async (req, res) => {
         return res.status(401).json({ message: "Invalid token" });
     }
 };
+export const logoutUser = async (req, res) => {
+    try {
+        // Clear the token cookie
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/'
+        });
+        return res.json({ message: "Logout successful" });
+    }
+    catch (err) {
+        console.error("Logout Error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+    }
+};
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -55,11 +72,19 @@ export const loginUser = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch)
             return res.status(400).json({ message: "Invalid credentials" });
-        // generate token
-        const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET || "secretkey", { expiresIn: "1h" });
+        // generate token with 6 hours expiration
+        const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET || "secretkey", { expiresIn: "6h" });
+        // Set cookie with secure options
+        const cookieOptions = {
+            httpOnly: true, // Prevents XSS attacks
+            secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+            sameSite: 'strict', // CSRF protection
+            maxAge: 6 * 60 * 60 * 1000, // 6 hours in milliseconds
+            path: '/'
+        };
+        res.cookie('token', token, cookieOptions);
         return res.json({
             message: "Login successful",
-            token,
             user: {
                 name: user.name,
                 email: user.email

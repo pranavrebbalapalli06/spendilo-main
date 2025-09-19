@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import authRoutes from "./route/authRoutes.js";
 import expenseRoutes from "./route/expenseRoutes.js";
@@ -9,8 +10,19 @@ dotenv.config();
 
 const app = express();
 
+// CORS configuration for deployment
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://spedilo-main.onrender.com', 'https://your-frontend-domain.com'] 
+    : ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true, // Allow cookies to be sent
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
+app.use(cookieParser());
 app.use(express.json());
 
 // Routes
