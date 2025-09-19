@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Endpoint Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { margin: 10px; padding: 10px 20px; }
+        .result { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { background-color: #ffebee; border-color: #f44336; }
+        .success { background-color: #e8f5e8; border-color: #4caf50; }
+    </style>
+</head>
+<body>
+    <h1>API Endpoint Test</h1>
+    <p>Testing if the API endpoints are working correctly with CORS.</p>
+    
+    <button onclick="testHealth()">Test Health Check</button>
+    <button onclick="testAuthMe()">Test Auth Me</button>
+    <button onclick="testRegister()">Test Register</button>
+    <button onclick="testLogin()">Test Login</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const baseURL = 'https://spedilo-main.onrender.com';
+        
+        function showResult(message, isError = false) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = `result ${isError ? 'error' : 'success'}`;
+        }
+
+        async function testHealth() {
+            showResult('Testing health endpoint...');
+            try {
+                const response = await fetch(`${baseURL}/api/health`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                showResult(`✅ Health Check Success!<br>Status: ${response.status}<br>Response: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult(`❌ Health Check Failed!<br>Error: ${error.message}`, true);
+            }
+        }
+
+        async function testAuthMe() {
+            showResult('Testing /api/auth/me endpoint...');
+            try {
+                const response = await fetch(`${baseURL}/api/auth/me`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                showResult(`✅ Auth Me Success!<br>Status: ${response.status}<br>Response: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult(`❌ Auth Me Failed!<br>Error: ${error.message}`, true);
+            }
+        }
+
+        async function testRegister() {
+            showResult('Testing /api/auth/register endpoint...');
+            try {
+                const response = await fetch(`${baseURL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: 'test@example.com',
+                        password: 'test123'
+                    })
+                });
+                const data = await response.json();
+                showResult(`✅ Register Success!<br>Status: ${response.status}<br>Response: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult(`❌ Register Failed!<br>Error: ${error.message}`, true);
+            }
+        }
+
+        async function testLogin() {
+            showResult('Testing /api/auth/login endpoint...');
+            try {
+                const response = await fetch(`${baseURL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'test123'
+                    })
+                });
+                const data = await response.json();
+                showResult(`✅ Login Success!<br>Status: ${response.status}<br>Response: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                showResult(`❌ Login Failed!<br>Error: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>

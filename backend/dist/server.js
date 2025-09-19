@@ -27,6 +27,7 @@ app.use(express.json());
 // Add logging middleware for debugging
 app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+    console.log('CORS allowed origins:', allowedOrigins);
     next();
 });
 // Health check endpoint
