@@ -57,11 +57,10 @@ export const loginUser = async (req: Request, res: Response) => {
       { expiresIn: "6h" }
     );
 
-    // Set cookie
-    res.cookie("token", token, getCookieOptions());
-
+    // Return token in body (client will store in localStorage)
     return res.json({
       message: "Login successful",
+      token,
       user: {
         name: user.name,
         email: user.email,
@@ -76,7 +75,6 @@ export const loginUser = async (req: Request, res: Response) => {
 // =================== LOGOUT ===================
 export const logoutUser = async (_req: Request, res: Response) => {
   try {
-    res.clearCookie("token", getCookieOptions());
     return res.json({ message: "Logout successful" });
   } catch (err) {
     console.error("Logout Error:", err);
