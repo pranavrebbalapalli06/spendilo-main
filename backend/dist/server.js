@@ -10,7 +10,7 @@ const app = express();
 // CORS configuration for deployment
 const corsOptions = {
     origin: process.env.NODE_ENV === 'production'
-        ? ['https://spedilo-main.onrender.com', 'https://your-frontend-domain.com']
+        ? true // Allow all origins in production for now
         : ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true, // Allow cookies to be sent
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
